@@ -202,7 +202,7 @@ function spinBars() {
     var minCycles = 20;
     var maxCycles = 50;
     var stopPositions = [0, 5];
-    var spinDuration = 4000; // Change this value to control spin length
+    var spinDuration = 7000; // Change this value to control spin length
     var finalStop = stopPositions[Math.floor(Math.random() * stopPositions.length)];
 
    function animateBarSequentially(index) {
@@ -247,6 +247,7 @@ function spinBars() {
 }
 function flashBars() {
   const bars = document.querySelector('.bars');
+  $('.bars').css('background', 'none'); // Remove background image
   bars.classList.add('flash-pink');
   // After animation, remove flash-pink and add flash-pink-done
   setTimeout(() => {
