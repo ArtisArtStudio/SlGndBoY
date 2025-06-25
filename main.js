@@ -49,16 +49,16 @@ var originalbackground;
         $('#tboy').show();
         $('#tboy').text(gendertext);
         $('#tboy').css('color',colortxt);
-        $('#boy').hide();
-        $('.images').hide();
-        $('#or').hide();
-        $('#girl').hide();
+        $('#boy').css('visibility', 'hidden');
+        $('.images').css('visibility', 'hidden');
+        $('#or').css('visibility', 'hidden');
+        $('#girl').css('visibility', 'hidden');
         document.getElementsByTagName("body")[0].style.backgroundColor = color;
         document.getElementsByTagName("body")[0].style.backgroundImage = 'none';
         //document.getElementById("H3").insertAdjacentHTML('afterend', "<h4 id='testtext' style='white-space:normal'> Depending on the product you buy, here it will say either <br> 'It is a Girl!' or 'It is a Boy! with pink or blue background.</h4>");
-        $('#this').hide();
-        $('#H3').hide();
-        $('#H4').hide();
+        $('#this').css('visibility', 'hidden');
+        $('#H3').css('visibility', 'hidden');
+        $('#H4').css('visibility', 'hidden');
         if (!nosound) {
             soundHandle.volume = 0.5;
             soundHandle.play();
@@ -87,7 +87,7 @@ var originalbackground;
           
         setTimeout(function(){
             $("#resetbutton").val('Start Again');
-            $("#resetbutton").show();
+            $("#resetbutton").css('visibility', 'visible');
         }, 7000);
               
      };
@@ -102,19 +102,19 @@ var originalbackground;
         $("#resetbutton").val('Spin It!');
 
         $('#tboy').hide();
-        $('#boy').show();
-        $('#or').show();
-        $('#girl').show();
-        $('.images').show();
+        $('#boy').css('visibility', 'visible');
+        $('#or').css('visibility', 'visible');
+        $('#girl').css('visibility', 'visible');
+        $('.images').css('visibility', 'visible');
         $('.bars').removeClass('flash-pink flash-pink-done');
         $('.bars').css('background', '');
         $('.bars').css('background-image', originalbackground);        
         document.getElementsByTagName("body")[0].style.backgroundColor = "#ffffff";
         document.getElementsByTagName("body")[0].style.backgroundImage = 'url(images/background.jpg)';
         // document.getElementById('testtext').remove();
-        $('#this').show();
-        $('#H3').show();
-        $('#H4').show();
+        $('#this').css('visibility', 'visible');
+        $('#H3').css('visibility', 'visible');
+        $('#H4').css('visibility', 'visible');
         triggered = false;
         soundHandle.pause();
         soundHandle.currentTime = 0;    
@@ -202,6 +202,7 @@ function spinBars() {
     var minCycles = 20;
     var maxCycles = 50;
     var stopPositions = [0, 5];
+    var spinDuration = 4000; // Change this value to control spin length
     var finalStop = stopPositions[Math.floor(Math.random() * stopPositions.length)];
 
    function animateBarSequentially(index) {
@@ -217,7 +218,7 @@ function spinBars() {
     var currentPosPx = (startIndex * iconHeight) - iconHeight;
     var targetPosPx = (finalStop * iconHeight) + iconHeight + (cycles * totalIcons * iconHeight);
 
-    var duration = 1200;
+      var duration = spinDuration * 0.8; // 80% of total spin time
 
     $({pos: currentPosPx}).animate({pos: targetPosPx}, {
         duration: duration,
@@ -233,10 +234,15 @@ function spinBars() {
     }, duration / 3);
 }
     animateBarSequentially(0);
+    // Calculate total time: first bar starts at 0, second at duration/3, third at 2*duration/3, etc.
+    // Last bar finishes at: (number of bars - 1) * (duration/3) + duration
+    var numBars = $('.bar').length;
+    var duration = spinDuration * 0.8;
+    var totalSpinTime = ((numBars - 1) * (duration / 3)) + duration;
+
     setTimeout(() => {
-      // Spin animation finished
       resolve();
-    }, 2000); // 2 seconds or your actual spin duration
+    }, totalSpinTime);
   });
 }
 function flashBars() {
@@ -254,10 +260,9 @@ async function onSpinButtonClick() {
     onResetClicked();
     return;
   }
-    $("#resetbutton").hide();
+    $("#resetbutton").css('visibility', 'hidden');
     await spinBars();    // Wait for spin to finish
     flashBars();
-    $("#resetbutton").hide();
     // Then start flash animation
     confetti_effect();
 }

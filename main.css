@@ -124,19 +124,15 @@ white-space:normal;
     box-shadow: rgba(50, 50, 93, 0.85) 0px 50px 30px -20px inset, rgba(50, 50, 93, 0.85) 0px -50px 30px -20px inset;
   }
 @keyframes flashPink {
-    0% { background-color: white;}
-    100% { background-color: #ff0b9a; box-shadow: 0 0 80px #ff0b9a }
-    
-
+    0% { background-color: white;background: none;  box-shadow: rgba(50, 50, 93, 0.85) 10px 50px 100px -20px, rgba(0, 0, 0, 0.2) 10px 30px 40px -5px, rgba(247, 247, 247, 0.5) 3px 3px 3px 3px inset, rgba(75, 76, 77, 0.25) -3px -3px 3px 3px inset;}
+    100% { background-color: #ff0b9a; box-shadow: rgba(50, 50, 93, 0.85) 10px 50px 100px -20px, rgba(0, 0, 0, 0.2) 10px 30px 40px -5px, rgba(247, 247, 247, 0.5) 3px 3px 3px 3px inset, rgba(75, 76, 77, 0.25) -3px -3px 3px 3px inset, 0 0 80px #ff0b9a;}
 }
 .bars.flash-pink {
     animation: flashPink 0.3s linear 0s 4 alternate;
-    background: #ff0b9a !important; /* override gradient */
-    box-shadow: 0 0 80px #ff0b9a;
 }
 .bars.flash-pink-done {
   background: #ff0b9a !important;
-  box-shadow: 0 0 80px #ff0b9a;
+  box-shadow: rgba(50, 50, 93, 0.85) 10px 50px 100px -20px, rgba(0, 0, 0, 0.2) 10px 30px 40px -5px, rgba(247, 247, 247, 0.5) 3px 3px 3px 3px inset, rgba(75, 76, 77, 0.25) -3px -3px 3px 3px inset, 0 0 80px #ff0b9a;
   animation: none !important;
 }
 /* Styles for mobile phones */ 
