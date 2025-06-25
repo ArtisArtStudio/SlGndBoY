@@ -3,7 +3,10 @@
  *
  * depends on jQuery>=1.7
  */
-
+var barPositions = [];
+var totalIcons = 10; // Number of icons per bar
+var iconHeight = 80;
+var originalbackground;
 (function() {
     /**
      * Returns true if this browser supports canvas
@@ -11,7 +14,7 @@
      * From http://diveintohtml5.info/
      */
 
-    var color1 = '#ff95c8';
+    var color1 = '#FAADD2FF';
     var color2 = '#5194f8';
     var color3 ='#969696';
     var colortxt1 = '#ff0b9a';
@@ -35,44 +38,6 @@
     function supportsCanvas() {
         return !!document.createElement('canvas').getContext;
     };
-    
-    
-    /**
-     * Handle scratch event on a scratcher
-     */
-    function checkpct() {
-        var p = 16;
-
-
-        if (!triggered) {
-            if (pct > 10 && pct < p) {
-                //document.getElementById("scratcher3Pct").innerHTML="Scratch MORE!";
-                if (CrispyToast.toasts.length===0) {
-                    CrispyToast.success('Scratch MORE!', { position: 'top-center', timeout: 2000});
-                } 
-            }
-            if (pct>p) {
-                if(CrispyToast.toasts.length!=0){
-                    CrispyToast.clearall();
-                }
-                $('#tboy').show();
-                $('#tboy').text(gendertext);
-                $('#tboy').css('color',colortxt);
-                $('#boy').hide();
-                $('.images').hide();
-                $('#or').hide();
-                $('#girl').hide();
-                document.getElementsByTagName("body")[0].style.backgroundColor = color;
-                document.getElementsByTagName("body")[0].style.backgroundImage = 'none';
-                //document.getElementById("H3").insertAdjacentHTML('afterend', "<h4 id='testtext' style='white-space:normal'> Depending on the product you buy, here it will say either <br> 'It is a Girl!' or 'It is a Boy! with pink or blue background.</h4>");
-                $('#this').hide();
-                $('#H3').hide();
-                $('#H4').hide();
-                confetti_effect();
-            }
-        }
-    };
-   
    
     function randomInRange(min, max) {
         return Math.random() * (max - min) + min;
@@ -81,13 +46,26 @@
         if (triggered == true) {
             return;
         }
+        $('#tboy').show();
+        $('#tboy').text(gendertext);
+        $('#tboy').css('color',colortxt);
+        $('#boy').hide();
+        $('.images').hide();
+        $('#or').hide();
+        $('#girl').hide();
+        document.getElementsByTagName("body")[0].style.backgroundColor = color;
+        document.getElementsByTagName("body")[0].style.backgroundImage = 'none';
+        //document.getElementById("H3").insertAdjacentHTML('afterend', "<h4 id='testtext' style='white-space:normal'> Depending on the product you buy, here it will say either <br> 'It is a Girl!' or 'It is a Boy! with pink or blue background.</h4>");
+        $('#this').hide();
+        $('#H3').hide();
+        $('#H4').hide();
         if (!nosound) {
             soundHandle.volume = 0.5;
             soundHandle.play();
         }
         triggered = true;
       
-            var duration = 10 * 1000;
+            var duration = 7 * 1000;
              var end = Date.now() + duration;
              var defaults = { startVelocity: 10, spread: 360, ticks: 70, zIndex: 0 };
              var particleCount = 5 ;
@@ -108,8 +86,9 @@
             }());
           
         setTimeout(function(){
+            $("#resetbutton").val('Start Again');
             $("#resetbutton").show();
-        }, 10000);
+        }, 7000);
               
      };
     
@@ -119,15 +98,17 @@
     function onResetClicked() {
         var i;
         pct = 0;
-        CrispyToast.toasts=[];
-        $("#resetbutton").hide();
-        
+        CrispyToast.toasts=[];  
+        $("#resetbutton").val('Spin It!');
+
         $('#tboy').hide();
         $('#boy').show();
         $('#or').show();
         $('#girl').show();
         $('.images').show();
-
+        $('.bars').removeClass('flash-pink flash-pink-done');
+        $('.bars').css('background', '');
+        $('.bars').css('background-image', originalbackground);        
         document.getElementsByTagName("body")[0].style.backgroundColor = "#ffffff";
         document.getElementsByTagName("body")[0].style.backgroundImage = 'url(images/background.jpg)';
         // document.getElementById('testtext').remove();
@@ -141,11 +122,8 @@
     };
    
     function initPage() {
-    
-        var i, i1;    
-        var barPositions = [];
-        var totalIcons = 10; // Number of icons per bar
-        var iconHeight = 80;
+        var i, i1;
+        originalbackground = $('.bars').css('background-image');    
        // Shuffle bars at the beginning (no animation)
         $('.bar').each(function(index, el) {
             // Random position between 0 and 9
@@ -167,7 +145,7 @@
         //document.getElementById('intro').innerHTML= "This is a gender reveal scratch off for <strong>" + surname + "</strong> family. It contains sound when the gender is revealed. Do you want to continue with sound?";
         document.getElementById('surname').innerHTML= surname;
 
-        document.getElementById('id01').style.display = 'block';
+        //document.getElementById('id01').style.display = 'block';
         $('.nosoundbtn').on("click", function (e) {
             document.getElementById('id01').style.display = 'none';
             nosound = true;
@@ -200,7 +178,6 @@
         
            
        
-        document.getElementById("resetbutton").style.backgroundColor = colortxt;
    // Add cubic easing if not present
         if (!jQuery.easing.easeOutCubic) {
             jQuery.easing.easeOutCubic = function (x, t, b, c, d) {
@@ -213,28 +190,22 @@
                 return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
             };
         }
-        // Animate bars on spin button click
- $('#resetbutton').on('click', function () {
+     $('#resetbutton').on('click', onSpinButtonClick); 
+    
+};
+function spinBars() {
+  return new Promise((resolve) => {
+    // Start spin animation for each bar
+    // For example, using setTimeout to simulate spin duration
+    // Replace this with your actual spin logic and callback
+    // Animate bars on spin button click
     var minCycles = 20;
     var maxCycles = 50;
     var stopPositions = [0, 5];
     var finalStop = stopPositions[Math.floor(Math.random() * stopPositions.length)];
-    console.log('Final stop: ' + finalStop);
 
    function animateBarSequentially(index) {
-    if (index >= $('.bar').length) {
-        // Save the original background
-        var $bars = $('.bars');
-        var originalBg = $bars.css('background');
-        // Remove the gradient and flash pink
-        $bars.css('background', 'none').addClass('flash-pink');
-        setTimeout(function() {
-            //$bars.removeClass('flash-pink');
-            // Restore the original background
-            //$bars.css('background', originalBg);
-        }, 1200); // 0.3s * 4 cycles = 1.2s
-        return;
-    }
+    
     var el = $('.bar').eq(index);
     var startIndex = barPositions[index];
     barPositions[index] = finalStop;
@@ -261,11 +232,35 @@
         animateBarSequentially(index + 1);
     }, duration / 3);
 }
-
     animateBarSequentially(0);
-});
-    };
-    
+    setTimeout(() => {
+      // Spin animation finished
+      resolve();
+    }, 2000); // 2 seconds or your actual spin duration
+  });
+}
+function flashBars() {
+  const bars = document.querySelector('.bars');
+  bars.classList.add('flash-pink');
+  // After animation, remove flash-pink and add flash-pink-done
+  setTimeout(() => {
+    bars.classList.remove('flash-pink');
+    bars.classList.add('flash-pink-done');
+  }, 1200); // 0.3s * 4 (duration * iterations)
+}
+
+async function onSpinButtonClick() {
+  if (triggered) {
+    onResetClicked();
+    return;
+  }
+    $("#resetbutton").hide();
+    await spinBars();    // Wait for spin to finish
+    flashBars();
+    $("#resetbutton").hide();
+    // Then start flash animation
+    confetti_effect();
+}
     /**
      * Handle page load
      */
