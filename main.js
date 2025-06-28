@@ -5,7 +5,7 @@
  */
 var barPositions = [];
 var totalIcons = 10; // Number of icons per bar
-var iconHeight = 80;
+var iconHeight;
 var originalbackground;
 (function() {
     /**
@@ -46,17 +46,11 @@ var originalbackground;
         if (triggered == true) {
             return;
         }
-        $('#tboy').show();
-        $('#tboy').text(gendertext);
-        $('#tboy').css('color',colortxt);
-        $('#boy').css('visibility', 'hidden');
-        $('.images').css('visibility', 'hidden');
-        $('#or').css('visibility', 'hidden');
-        $('#girl').css('visibility', 'hidden');
+        $('#t1').text(gendertext);
+        $('#t1').css('color',colortxt);
         document.getElementsByTagName("body")[0].style.backgroundColor = color;
         document.getElementsByTagName("body")[0].style.backgroundImage = 'none';
         //document.getElementById("H3").insertAdjacentHTML('afterend', "<h4 id='testtext' style='white-space:normal'> Depending on the product you buy, here it will say either <br> 'It is a Girl!' or 'It is a Boy! with pink or blue background.</h4>");
-        $('#this').css('visibility', 'hidden');
         $('#H3').css('visibility', 'hidden');
         $('#H4').css('visibility', 'hidden');
         if (!nosound) {
@@ -99,20 +93,15 @@ var originalbackground;
         var i;
         pct = 0;
         CrispyToast.toasts=[];  
-        $("#resetbutton").val('Spin It!');
+        $("#resetbutton").val('Play!');
 
-        $('#tboy').hide();
-        $('#boy').css('visibility', 'visible');
-        $('#or').css('visibility', 'visible');
-        $('#girl').css('visibility', 'visible');
-        $('.images').css('visibility', 'visible');
+        $('#t1').html("<span id='boy' style='color:#7FB1ED ;white-space: normal;'>Boy</span><span id='or' style='font-size: 0.6em; color:#424242;white-space: normal;'> or </span><span id='girl' style='color:#ffc0cb;white-space: normal;'>Girl</span>");
         $('.bars').removeClass('flash-pink flash-pink-done');
         $('.bars').css('background', '');
         $('.bars').css('background-image', originalbackground);        
         document.getElementsByTagName("body")[0].style.backgroundColor = "#ffffff";
         document.getElementsByTagName("body")[0].style.backgroundImage = 'url(images/background.jpg)';
         // document.getElementById('testtext').remove();
-        $('#this').css('visibility', 'visible');
         $('#H3').css('visibility', 'visible');
         $('#H4').css('visibility', 'visible');
         triggered = false;
@@ -124,9 +113,18 @@ var originalbackground;
     function initPage() {
         var i, i1;
         originalbackground = $('.bars').css('background-image');    
-       // Shuffle bars at the beginning (no animation)
+        // Calculate scaling ratio based on .bars max-width (300px) and image width (80px)
+        const bars = document.querySelector('.bars');
+        const bar = document.querySelector('.bar');
+        // .bar width is flex: 1 1 0, so for 3 bars: (300px - 2*margin) / 3
+        // We'll use offsetWidth for actual rendered width
+        const style = getComputedStyle(bar);
+        const border = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+        const barWidth = bar.getBoundingClientRect().width;
+        iconHeight = barWidth-border; // or just barWidth if icons are square        console.log('iconHeight:'+ iconHeight+" "+ bar.offsetWidth);
+
+        // Shuffle bars at the beginning (no animation)
         $('.bar').each(function(index, el) {
-            // Random position between 0 and 9
             var pos = Math.floor(Math.random() * totalIcons);
             barPositions[index] = pos;
             // Set background position so that 'pos' is in the middle
