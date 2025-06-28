@@ -109,19 +109,25 @@ var originalbackground;
         soundHandle.currentTime = 0;    
         return false;
     };
-   
-    function initPage() {
-        var i, i1;
-        originalbackground = $('.bars').css('background-image');    
-        // Calculate scaling ratio based on .bars max-width (300px) and image width (80px)
-        const bars = document.querySelector('.bars');
+   function calculatesize() {
+            // Calculate scaling ratio based on .bars max-width (300px) and image width (80px)
         const bar = document.querySelector('.bar');
-        // .bar width is flex: 1 1 0, so for 3 bars: (300px - 2*margin) / 3
-        // We'll use offsetWidth for actual rendered width
         const style = getComputedStyle(bar);
         const border = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
         const barWidth = bar.getBoundingClientRect().width;
-        iconHeight = barWidth-border; // or just barWidth if icons are square        console.log('iconHeight:'+ iconHeight+" "+ bar.offsetWidth);
+        iconHeight = barWidth-border; 
+   }
+    function initPage() {
+        var i, i1;
+        originalbackground = $('.bars').css('background-image');
+        $( window ).on({
+            orientationchange: function(e) {
+                calculatesize();
+            },resize: function(e) {
+                calculatesize();
+            }
+        });            
+        calculatesize();
 
         // Shuffle bars at the beginning (no animation)
         $('.bar').each(function(index, el) {
