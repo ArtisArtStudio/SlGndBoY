@@ -7,6 +7,9 @@ var barPositions = [];
 var totalIcons = 10; // Number of icons per bar
 var iconHeight;
 var originalbackground;
+var isSpinning = false;
+var spinCancelled = false;
+
 (function() {
     /**
      * Returns true if this browser supports canvas
@@ -104,18 +107,45 @@ var originalbackground;
         // document.getElementById('testtext').remove();
         $('#H3').css('visibility', 'visible');
         $('#H4').css('visibility', 'visible');
+        positionBars(true); // realign to random positions
         triggered = false;
         soundHandle.pause();
         soundHandle.currentTime = 0;    
         return false;
     };
+   function forceResetSpin() {
+    // Stop all bar animations immediately
+    $('.bar').stop(true, true);
+    isSpinning = false;
+    spinCancelled = true;
+    positionBars(false); // realign to last known positions
+    $("#resetbutton").css('visibility', 'visible'); 
+    onResetClicked(); // reset the game
+   }
    function calculatesize() {
-            // Calculate scaling ratio based on .bars max-width (300px) and image width (80px)
+        // Calculate scaling ratio based on .bars max-width (300px) and image width (80px)
+        if (isSpinning || triggered) {
+            forceResetSpin();
+            return;
+        }
         const bar = document.querySelector('.bar');
         const style = getComputedStyle(bar);
         const border = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
         const barWidth = bar.getBoundingClientRect().width;
         iconHeight = barWidth-border; 
+        positionBars(false);
+   }
+   function positionBars(randomize) {
+       $('.bar').each(function(index, el) {
+         if (!randomize) {   
+           $(el).css('background-position-y', ((barPositions[index] * iconHeight) - iconHeight) + 'px');
+         } else {
+           var pos = Math.floor(Math.random() * totalIcons);
+           barPositions[index] = pos;
+           // Set background position so that 'pos' is in the middle
+           $(el).css('background-position-y', ((pos * iconHeight) - iconHeight) + 'px');
+         }
+       });
    }
     function initPage() {
         var i, i1;
@@ -130,12 +160,7 @@ var originalbackground;
         calculatesize();
 
         // Shuffle bars at the beginning (no animation)
-        $('.bar').each(function(index, el) {
-            var pos = Math.floor(Math.random() * totalIcons);
-            barPositions[index] = pos;
-            // Set background position so that 'pos' is in the middle
-            $(el).css('background-position-y', ((pos * iconHeight) - iconHeight) + 'px');
-        });
+        positionBars(true);
         surname = params.get('surname');
         if (surname !=null && surname.replace(/\s/g, '').length) {
             $("#baby").text('Baby ' + surname);
@@ -198,56 +223,52 @@ var originalbackground;
     
 };
 function spinBars() {
-  return new Promise((resolve) => {
-    // Start spin animation for each bar
-    // For example, using setTimeout to simulate spin duration
-    // Replace this with your actual spin logic and callback
-    // Animate bars on spin button click
-    var minCycles = 20;
-    var maxCycles = 50;
-    var stopPositions = [0, 5];
-    var spinDuration = 7000; // Change this value to control spin length
-    var finalStop = stopPositions[Math.floor(Math.random() * stopPositions.length)];
+    isSpinning = true;
+    spinCancelled = false;
+    return new Promise((resolve) => {
+        var minCycles = 20;
+        var maxCycles = 50;
+        var stopPositions = [0, 5];
+        var spinDuration = 7000;
+        var finalStop = stopPositions[Math.floor(Math.random() * stopPositions.length)];
 
-   function animateBarSequentially(index) {
-    
-    var el = $('.bar').eq(index);
-    var startIndex = barPositions[index];
-    barPositions[index] = finalStop;
+        function animateBarSequentially(index) {
+            if (spinCancelled) return; // Stop animation chain if cancelled
+            var el = $('.bar').eq(index);
+            var startIndex = barPositions[index];
+            barPositions[index] = finalStop;
 
-    var cycles = Math.floor(Math.random() * (maxCycles - minCycles + 1)) + minCycles;
-    var stepsToTarget = ((finalStop - startIndex + totalIcons) % totalIcons);
-    var totalSteps = cycles * totalIcons + stepsToTarget;
+            var cycles = Math.floor(Math.random() * (maxCycles - minCycles + 1)) + minCycles;
+            var stepsToTarget = ((finalStop - startIndex + totalIcons) % totalIcons);
+            var totalSteps = cycles * totalIcons + stepsToTarget;
 
-    var currentPosPx = (startIndex * iconHeight) - iconHeight;
-    var targetPosPx = (finalStop * iconHeight) + iconHeight + (cycles * totalIcons * iconHeight);
+            var currentPosPx = (startIndex * iconHeight) - iconHeight;
+            var targetPosPx = (finalStop * iconHeight) + iconHeight + (cycles * totalIcons * iconHeight);
 
-      var duration = spinDuration * 0.8; // 80% of total spin time
+            var duration = spinDuration * 0.8;
 
-    $({pos: currentPosPx}).animate({pos: targetPosPx}, {
-        duration: duration,
-        easing: 'easeOutBack',
-        step: function (now) {
-            el.css('background-position-y', now + 'px');
+            $({pos: currentPosPx}).animate({pos: targetPosPx}, {
+                duration: duration,
+                easing: 'easeOutBack',
+                step: function (now) {
+                    if (spinCancelled) return false; // Stop animation immediately
+                    el.css('background-position-y', now + 'px');
+                }
+            });
+
+            setTimeout(function () {
+                if (!spinCancelled) animateBarSequentially(index + 1);
+            }, duration / 3);
         }
+        animateBarSequentially(0);
+        var numBars = $('.bar').length;
+        var duration = spinDuration * 0.8;
+        var totalSpinTime = ((numBars - 1) * (duration / 3)) + duration;
+
+        setTimeout(() => {
+            if (!spinCancelled) resolve();
+        }, totalSpinTime);
     });
-
-    // Start the next bar halfway through this one's animation
-    setTimeout(function () {
-        animateBarSequentially(index + 1);
-    }, duration / 3);
-}
-    animateBarSequentially(0);
-    // Calculate total time: first bar starts at 0, second at duration/3, third at 2*duration/3, etc.
-    // Last bar finishes at: (number of bars - 1) * (duration/3) + duration
-    var numBars = $('.bar').length;
-    var duration = spinDuration * 0.8;
-    var totalSpinTime = ((numBars - 1) * (duration / 3)) + duration;
-
-    setTimeout(() => {
-      resolve();
-    }, totalSpinTime);
-  });
 }
 function flashBars() {
   const bars = document.querySelector('.bars');
@@ -267,6 +288,7 @@ async function onSpinButtonClick() {
   }
     $("#resetbutton").css('visibility', 'hidden');
     await spinBars();    // Wait for spin to finish
+    isSpinning = false;
     flashBars();
     // Then start flash animation
     confetti_effect();
