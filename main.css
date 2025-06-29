@@ -46,7 +46,7 @@ font-weight: 400;
 flex-direction: column;
 font-size: calc(3rem + 2vw);
 text-align: center;
-text-shadow: 3px 2px #ffffff;
+text-shadow: 3px 2px 6px #4e4d4d, -2px -1px 0px #ffffff, 2px 1px 1px #000000;
 } 
 
 .pagetop h3 {
@@ -449,10 +449,25 @@ hr {
   }
 }
 @keyframes pulsate {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.08); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    background: linear-gradient(90deg, #ffb6e6 0%, #b6e6ff 100%);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+    background: linear-gradient(90deg, #ffe6f6 0%, #e6f6ff 100%);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    background: linear-gradient(90deg, #ffb6e6 0%, #b6e6ff 100%);
+  }
 }
 .pulsate {
-  animation: pulsate 0.8s infinite;
+  animation: pulsate 2s infinite;
+  border-radius: 1em;
+  background: linear-gradient(90deg, #ffb6e6 0%, #b6e6ff 100%);
+  transition: background 0.6s;
 }

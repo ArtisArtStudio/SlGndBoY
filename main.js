@@ -176,17 +176,22 @@ function shuffleArray(array) {
         }, 500);
    }
    function positionBars(randomize) {
-       $('.bar').each(function(index, el) {
-         if (!randomize) {   
-           $(el).css('background-position-y', ((barPositions[index] * iconHeight) - iconHeight) + 'px');
-         } else {
-           var pos = Math.floor(Math.random() * totalIcons);
-           barPositions[index] = pos;
-           // Set background position so that 'pos' is in the middle
-           $(el).css('background-position-y', ((pos * iconHeight) - iconHeight) + 'px');
-         }
-       });
-   }
+    if (!randomize) {
+        $('.bar').each(function(index, el) {
+            $(el).css('background-position-y', ((barPositions[index] * iconHeight) - iconHeight) + 'px');
+        });
+    } else {
+        // Use the same unique-per-bar logic as in spinBars for initial shuffle
+        var allowedStops = Array.from({length: totalIcons}, (_, i) => i).filter(i => !stopPositions.includes(i));
+        var numBars = $('.bar').length;
+        var uniqueStops = shuffleArray(allowedStops).slice(0, numBars);
+        $('.bar').each(function(index, el) {
+            var pos = uniqueStops[index];
+            barPositions[index] = pos;
+            $(el).css('background-position-y', ((pos * iconHeight) - iconHeight) + 'px');
+        });
+    }
+}
     function display_dialog(text) {
         $( "#error" ).text(text);
                     $( function() {
@@ -374,7 +379,7 @@ async function onSpinButtonClick() {
   let uniquePerBar = false;
   // Show spinning message with pulsate effect
   $('#gameText').css('visibility', 'visible');
-  $("#gameText").text("🎲 Spinning... The moment of truth! 🎲").addClass('pulsate');
+  $("#gameText").text("🎲 Spinning... The moment of truth!").addClass('pulsate');
   if (isFinalSpin) {
     allowedStops = stopPositions;
   } else {
@@ -387,12 +392,12 @@ async function onSpinButtonClick() {
   $("#gameText").removeClass('pulsate');
   spinCount++;
   if (isFirstSpin) {
-    $("#gameText").text("👶 The baby is keeping it a secret! 👶");
+    $("#gameText").text("👶 The baby is keeping it a secret!");
     $("#resetbutton").val('Spin Again');
     $("#resetbutton").css('visibility', 'visible');
   } else if (isSecondSpin) {
-    $("#gameText").text("🤔 Hmm, mixed signals! Try again! 🤔");
-    $("#resetbutton").val('Final Spin');
+    $("#gameText").text("🤔 Hmm, mixed signals! Try again!");
+    // $("#resetbutton").val('Final Spin');
     $("#resetbutton").css('visibility', 'visible');
   } else if (isFinalSpin) {
     // Do the reveal after a short delay for effect
