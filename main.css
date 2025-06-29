@@ -129,7 +129,7 @@ white-space:normal;
     background-repeat: repeat-y;
     background-size:100% auto;
     background-position: 0 0px;
-    box-shadow: rgba(50, 50, 93, 0.85) 0px 50px 30px -20px inset, rgba(50, 50, 93, 0.85) 0px -50px 30px -20px inset, rgb(0, 0, 0) 0px 10px 10px -4px inset, rgba(0, 0, 0, 1) 0px -10px 10px -4px inset;
+    box-shadow: rgba(50, 50, 93, 0.6) 0px 50px 30px -20px inset, rgba(50, 50, 93, 0.6) 0px -50px 30px -20px inset, rgb(0, 0, 0,1) 0px 15px 10px -4px inset, rgba(0, 0, 0, 1) 0px -15px 10px -4px inset;
   }
 @keyframes flashPink {
     0% { background-color: white;background: none;  box-shadow: rgba(50, 50, 93, 0.85) 10px 50px 100px -20px, rgba(0, 0, 0, 0.2) 10px 30px 40px -5px, rgba(247, 247, 247, 0.5) 3px 3px 3px 3px inset, rgba(75, 76, 77, 0.25) -3px -3px 3px 3px inset;}
@@ -447,4 +447,12 @@ hr {
   h2{
     font-size: 6vw;
   }
+}
+@keyframes pulsate {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.pulsate {
+  animation: pulsate 0.8s infinite;
 }

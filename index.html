@@ -17,6 +17,9 @@
   window.jQuery || document.write('<script src="jquery.min.js"><\/script>');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.8.0/dist/confetti.browser.min.js"></script>
+<script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+
 <!-- CSS and scripts -->
 
 <link href="main.css" rel="stylesheet" type="text/css">
@@ -31,7 +34,7 @@
     <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close">×</span>
     <form class="modal-content" action="javascript:void(0);">
       <div class="container">
-        <h2 id="intro">This is a gender reveal scratch off for <span id="surname" style="font-weight:bold; white-space:normal">the</span> family. It contains high level sound. Do you want to continue with sound?</h2>      
+        <h2 id="intro">This is a gender reveal for <span id="surname" style="font-weight:bold; white-space:normal">the</span> family. It contains high level sound. Do you want to continue with sound?</h2>      
         <!-- <h5 style="color:red; white-space: normal;">This is a demo with limited functionality. So only middle row can be scratched.</h5> -->
         <div class="clearfix">
           <button type="button" class="nosoundbtn">No Sound</button>
@@ -57,7 +60,10 @@
 <div id="reveal">
 <table style="width: 100%;">
   <tr>
-  <td><h3 id="H3">Gift is on backorder. Scratch to see what <span id="baby">the Baby(ies)</span> will be!</h3>
+  <td><h3 id="H3">Try your luck—find out what <span id="baby">the Baby(ies)</span> will be!</h3>
+  </td></tr>
+  <tr>
+  <td><h3 id="gameText"></h3>
   </td></tr>
   <tr><td><input type="button" class="button-35" id="resetbutton" value="Play!"></input></td>
   </tr>
@@ -69,8 +75,12 @@
 </div>
 <!-- end common pagetop -->
 
-<!-- Begin scratcher -->
-
+<div id="dialog-message" style="display: none"; title="Warning">
+  <p>
+    <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 50px 0; transform: scale(2);-webkit-transform: scale(2);"></span>
+    <span id="error" style="white-space: normal;"> </span>
+  </p>
+</div>
 
 
 <p><noscript>(This page requires JavaScript to run correctly. Please enable JavaScript from your Browser's settings.)</noscript></p>
