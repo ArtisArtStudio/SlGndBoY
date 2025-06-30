@@ -167,18 +167,51 @@ function shuffleArray(array) {
             return;
         }
         setTimeout(function() {
-        const bar = document.querySelector('.bar');
-        const style = getComputedStyle(bar);
-        const border = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
-        const barWidth = bar.getBoundingClientRect().width;
-        iconHeight = barWidth-border; 
-        positionBars(false);
+            const bars = document.querySelector('.bars');
+            if (!bars) return;
+            const barsWidth = bars.getBoundingClientRect().width;
+            const barsHeight = bars.getBoundingClientRect().height;
+            const numBars = document.querySelectorAll('.bar').length;
+
+            // Set .bars max size and padding
+            bars.style.maxWidth = '300px';
+            bars.style.maxHeight = '270px';
+            const barsPadding = barsWidth / 10;
+            bars.style.padding = barsPadding + 'px';
+
+            // Set .bar margin (horizontal)
+            const barMargin = barsWidth / 100;
+            $('.bar').each(function() {
+                this.style.marginLeft = Math.round(barMargin) + 'px';
+                this.style.marginRight = Math.round(barMargin) + 'px';
+            });
+
+            // Calculate available width for bars (excluding paddings and margins)
+            const totalBarMargins = numBars * 2 * Math.round(barMargin);
+            const availableWidth = barsWidth - 2 * barsPadding - totalBarMargins;
+            const barWidth = availableWidth / numBars;
+            $('.bar').each(function() {
+                this.style.width = Math.round(barWidth) + 'px';
+            });
+
+            // Set .bar height to fill .bars height (minus vertical paddings if any)
+            // For vertical centering, assume no vertical padding for .bars
+            var barHeight = Math.round(barWidth * 3); // keep integer
+            $('.bar').each(function() {
+                this.style.height = barHeight + 'px';
+            });
+
+            // Set iconHeight so that exactly 3 icons fit in .bar
+            iconHeight = Math.round(barHeight / 3);
+
+            positionBars(false);
         }, 500);
    }
    function positionBars(randomize) {
     if (!randomize) {
         $('.bar').each(function(index, el) {
-            $(el).css('background-position-y', ((barPositions[index] * iconHeight) - iconHeight) + 'px');
+            var posY = Math.round((barPositions[index] * iconHeight) - iconHeight);
+            $(el).css('background-position-y', posY + 'px');
         });
     } else {
         // Use the same unique-per-bar logic as in spinBars for initial shuffle
@@ -188,7 +221,8 @@ function shuffleArray(array) {
         $('.bar').each(function(index, el) {
             var pos = uniqueStops[index];
             barPositions[index] = pos;
-            $(el).css('background-position-y', ((pos * iconHeight) - iconHeight) + 'px');
+            var posY = Math.round((pos * iconHeight) - iconHeight);
+            $(el).css('background-position-y', posY + 'px');
         });
     }
 }
@@ -243,7 +277,7 @@ function shuffleArray(array) {
         //document.getElementById('intro').innerHTML= "This is a gender reveal scratch off for <strong>" + surname + "</strong> family. It contains sound when the gender is revealed. Do you want to continue with sound?";
         document.getElementById('surname').innerHTML= surname;
 
-        //document.getElementById('id01').style.display = 'block';
+        document.getElementById('id01').style.display = 'block';
         $('.nosoundbtn').on("click", function (e) {
             document.getElementById('id01').style.display = 'none';
             nosound = true;
@@ -299,6 +333,7 @@ function spinBars(allowedStops, uniquePerBar) {
       spinTimeouts.forEach(function(id) { clearTimeout(id); });
       spinTimeouts = [];
     }
+    var reelSoundHandle = null;
     return new Promise((resolve) => {
         var minCycles = 20;
         var maxCycles = 50;
@@ -313,8 +348,33 @@ function spinBars(allowedStops, uniquePerBar) {
           var stop = allowedStops[Math.floor(Math.random() * allowedStops.length)];
           finalStops = Array(numBars).fill(stop);
         }
+        // Play reel.mp3 once at the start if nosound is false
+        if (!nosound) {
+            try {
+                reelSoundHandle = new Audio('audio/reel.mp3');
+                reelSoundHandle.volume = 0.5;
+                reelSoundHandle.loop = true;
+                reelSoundHandle.play();
+            } catch (e) {
+                reelSoundHandle = null;
+            }
+        }
+
+        function stopReelSound() {
+            if (reelSoundHandle) {
+                try {
+                    reelSoundHandle.pause();
+                    reelSoundHandle.currentTime = 0;
+                } catch (e) {}
+                reelSoundHandle = null;
+            }
+        }
+
         function animateBarSequentially(index) {
-            if (spinCancelled) return; // Stop animation chain if cancelled
+            if (spinCancelled) {
+                stopReelSound();
+                return; // Stop animation chain if cancelled
+            }
             if (index >= numBars) return;
             var el = $('.bar').eq(index);
             var startIndex = barPositions[index];
@@ -325,6 +385,7 @@ function spinBars(allowedStops, uniquePerBar) {
             var currentPosPx = (startIndex * iconHeight) - iconHeight;
             var targetPosPx = (finalStops[index] * iconHeight) + iconHeight + (cycles * totalIcons * iconHeight);
             var duration = spinDuration * 0.8;
+
             $({pos: currentPosPx}).animate({pos: targetPosPx}, {
                 duration: duration,
                 easing: 'easeOutBack',
@@ -342,6 +403,7 @@ function spinBars(allowedStops, uniquePerBar) {
         var duration = spinDuration * 0.8;
         var totalSpinTime = ((numBars - 1) * (duration / 3)) + duration;
         var resolveTimeoutId = setTimeout(() => {
+            stopReelSound();
             if (!spinCancelled) resolve();
         }, totalSpinTime);
         spinTimeouts.push(resolveTimeoutId);

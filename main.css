@@ -46,7 +46,7 @@ font-weight: 400;
 flex-direction: column;
 font-size: calc(3rem + 2vw);
 text-align: center;
-text-shadow: 3px 2px 6px #4e4d4d, -2px -1px 0px #ffffff, 2px 1px 1px #000000;
+text-shadow: 3px 2px 6px #4e4d4d, -2px -1px 0px #ffffff, 1px 1px 1px #000000;
 } 
 
 .pagetop h3 {
@@ -99,32 +99,30 @@ white-space:normal;
   max-width: 350px !important;
 } */
 .bars{
-  display:flex;
-  /* top: 25%; */
+  display: flex;
+  align-items: center; /* Center bars vertically */
+  justify-content: space-between;
   margin-left: auto;
   margin-right: auto;
-  bottom: 5%;
-  width:70vw;
+  width: 70vw;
   max-width: 300px;
   height: 63vw;
   max-height: 270px;
-  left: 50%; 
-  transform: translateX(-50%); 
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 5vh;
   position: fixed;
   padding: 5vw;
-  box-shadow: -2px 2px 3px rgba(black, 0.3);
-  justify-content: space-between;
+  box-shadow: -2px 2px 3px rgba(0,0,0,0.3);
   background: linear-gradient(135deg,rgba(10, 186, 255, 1) 0%, rgba(237, 83, 188, 1) 100%);
-
   box-shadow: rgba(0, 0, 0, 0.8) 10px 10px 20px -5px, rgba(247, 247, 247, 0.5) 3px 3px 3px 3px inset, rgba(75, 76, 77, 0.25) -3px -3px 3px 3px inset;
   /* box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset; */
 }
 .bar{
     flex: 1 1 0;
-    margin: 0 1vw;
+    margin: 0 5vw;
     height: 100%;
-    border: 1px solid #000000;
+    /* border: 0px solid #000000; */
     background-image: url(images/bar.jpg);
     background-repeat: repeat-y;
     background-size:100% auto;
@@ -152,7 +150,12 @@ white-space:normal;
   .pagetop h1 {
     font-size: calc(3rem + 2vw);
   }
-  
+ /*  .bars {
+    padding: 2vw;
+  }
+  .bar {
+    margin: 0 0.5vw;
+  } */
 }
 
 /* @media (max-width: 430px), (max-height:670px) {
@@ -177,28 +180,34 @@ white-space:normal;
   .pagetop h1 {
     font-size: calc(3rem + 4vw);
   }
+  /* .bars {
+    padding: 3vw;
+  }
+  .bar {
+    margin: 0 0.7vw;
+  } */
 
-
-  #scratcher-box {
+ /*  #scratcher-box {
     position:absolute;
     width: 30em;
     height: 30em; 
     top: 60%;
-  } 
+  }  */
   .pagetop h4 {
     font-size: 2vh;
   }  
   
 }
-@media (min-width: 1024px){
+
+/* @media (min-width: 1024px){
 .bars {
     padding: 3vh;
   }
   .bar {
-        margin: 0 1vh;
+    margin: 0 1vh;
   }
-}
-@media (min-height: 635px) and (min-width: 1024px){ 
+} */
+@media (min-height: 635px) and (min-width: 1023px){ 
   .pagetop h3 {
     font-size: calc(1.5rem + 0.5vh);
   } 
@@ -209,18 +218,18 @@ white-space:normal;
   .pagetop h4 {
     font-size: 2vh;
   }
-  .bars {
-    padding: 2vh;
+ /*  .bars {
+    padding: 1.2vw;
   }
   .bar {
-        margin: 0 1vh;
-  }
-  #scratcher-box {
+        margin: 0 0.4vw;
+  } */
+  /* #scratcher-box {
     position:absolute;
     width: 26em;
     height: 26em; 
     top: 73%;
-  }
+  } */
 }
 @media (max-width: 375px), (max-height:667px) {
   .pagetop h4 {
@@ -242,12 +251,12 @@ white-space:normal;
       transform-origin: top left;
   } */
 
-  #scratcher-box {
+ /*  #scratcher-box {
     position:absolute;
     width: 21em;
     height: 21em; 
     top: 70%;
-  }
+  } */
   
 } 
 
@@ -450,23 +459,38 @@ hr {
 }
 @keyframes pulsate {
   0% {
-    opacity: 1;
     transform: scale(1);
+    opacity: 1;
     background: linear-gradient(90deg, #ffb6e6 0%, #b6e6ff 100%);
   }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
+  10% {
+    transform: scale(1.18);
+    opacity: 0.95;
     background: linear-gradient(90deg, #ffe6f6 0%, #e6f6ff 100%);
   }
-  100% {
-    opacity: 1;
+  20% {
     transform: scale(1);
+    opacity: 1;
+    background: linear-gradient(90deg, #ffb6e6 0%, #b6e6ff 100%);
+  }
+  30% {
+    transform: scale(1.13);
+    opacity: 0.92;
+    background: linear-gradient(90deg, #ffe6f6 0%, #e6f6ff 100%);
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+    background: linear-gradient(90deg, #ffb6e6 0%, #b6e6ff 100%);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
     background: linear-gradient(90deg, #ffb6e6 0%, #b6e6ff 100%);
   }
 }
 .pulsate {
-  animation: pulsate 2s infinite;
+  animation: pulsate 1.7s infinite;
   border-radius: 1em;
   background: linear-gradient(90deg, #ffb6e6 0%, #b6e6ff 100%);
   transition: background 0.6s;
