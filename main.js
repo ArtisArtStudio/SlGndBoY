@@ -3,12 +3,12 @@
  *
  * depends on jQuery>=1.7
  */
+// Global DOM/query cache for performance
 var barPositions = [];
 var totalIcons = 10; // Number of icons per bar
 var iconHeight;
 var originalbackground;
 var stopPositions = [0, 5];
-
 var isSpinning = false;
 var spinCancelled = false;
 var spinTimeouts = [];
@@ -17,6 +17,8 @@ var confettiFrameId = null;
 var confettiCancelled = false;
 var confettiTimeoutId = null;
 var spinCount = 0;
+// Cached DOM elements
+var $bars, bars, $barElems, numBars;
 
 // Utility: Fisher-Yates shuffle
 function shuffleArray(array) {
@@ -164,45 +166,52 @@ function shuffleArray(array) {
         if (isSpinning || triggered) {
             forceResetSpin();
             display_dialog("Please wait for the current spin to finish before resizing or changing orientation.");
-            return;
         }
         setTimeout(function() {
-            const bars = document.querySelector('.bars');
+            // Use cached DOM elements
             if (!bars) return;
             const barsWidth = bars.getBoundingClientRect().width;
-            const barsHeight = bars.getBoundingClientRect().height;
-            const numBars = document.querySelectorAll('.bar').length;
 
             // Set .bars max size and padding
             bars.style.maxWidth = '300px';
             bars.style.maxHeight = '270px';
-            const barsPadding = barsWidth / 10;
+            const barsPadding = Math.round(barsWidth / 10);
             bars.style.padding = barsPadding + 'px';
 
             // Set .bar margin (horizontal)
-            const barMargin = barsWidth / 100;
-            $('.bar').each(function() {
-                this.style.marginLeft = Math.round(barMargin) + 'px';
-                this.style.marginRight = Math.round(barMargin) + 'px';
+            const barMargin = Math.round((barsWidth) / 100);
+            $barElems.each(function() {
+                this.style.marginLeft = barMargin + 'px';
+                this.style.marginRight = barMargin + 'px';
             });
 
             // Calculate available width for bars (excluding paddings and margins)
-            const totalBarMargins = numBars * 2 * Math.round(barMargin);
+            const totalBarMargins = (numBars * 2 * barMargin);
             const availableWidth = barsWidth - 2 * barsPadding - totalBarMargins;
             const barWidth = availableWidth / numBars;
-            $('.bar').each(function() {
-                this.style.width = Math.round(barWidth) + 'px';
+            $barElems.each(function() {
+                this.style.width = barWidth + 'px';
             });
 
             // Set .bar height to fill .bars height (minus vertical paddings if any)
             // For vertical centering, assume no vertical padding for .bars
-            var barHeight = Math.round(barWidth * 3); // keep integer
-            $('.bar').each(function() {
+            var barHeight = barWidth * 3; // keep integer
+            $barElems.each(function() {
                 this.style.height = barHeight + 'px';
             });
 
             // Set iconHeight so that exactly 3 icons fit in .bar
-            iconHeight = Math.round(barHeight / 3);
+            iconHeight = barHeight / 3;
+
+            // Log all relevant values for debugging
+            let sumBarWidths = 0;
+            let sumBarMargins = 0;
+            $barElems.each(function() {
+                sumBarWidths += this.getBoundingClientRect().width;
+                sumBarMargins += parseFloat(this.style.marginLeft) + parseFloat(this.style.marginRight);
+            });
+            const totalUsed = sumBarWidths + sumBarMargins + 2 * barsPadding;
+            console.log('barsWidth: ' + barsWidth + ' sumBarWidths: ' + sumBarWidths + ' sumBarMargins: ' + sumBarMargins + ' barsPadding*2: ' + (2 * barsPadding) + ' totalUsed: ' + totalUsed + ' diff: ' + (barsWidth - totalUsed));
 
             positionBars(false);
         }, 500);
@@ -251,31 +260,34 @@ function shuffleArray(array) {
                     });
     }
     function initPage() {
-        var i, i1;
-        originalbackground = $('.bars').css('background-image');
-        $( window ).on({
+        // Cache DOM queries
+        $bars = $('.bars');
+        bars = $bars[0];
+        $barElems = $('.bar');
+        numBars = $barElems.length;
+        originalbackground = $bars.css('background-image');
+
+        $(window).on({
             orientationchange: function(e) {
                 calculatesize();
-            },resize: function(e) {
+            },
+            resize: function(e) {
                 calculatesize();
             }
-        });            
+        });
         calculatesize();
 
         // Shuffle bars at the beginning (no animation)
         positionBars(true);
         surname = params.get('surname');
-        if (surname !=null && surname.replace(/\s/g, '').length) {
+        if (surname != null && surname.replace(/\s/g, '').length) {
             $("#baby").text('Baby ' + surname);
         } else {
             $("#baby").text('the Baby');
-            document.getElementById('surname').style.fontWeight="normal";
+            document.getElementById('surname').style.fontWeight = "normal";
             $('#baby').css('font-weight', 'normal');
-
         }
-        
-        //document.getElementById('intro').innerHTML= "This is a gender reveal scratch off for <strong>" + surname + "</strong> family. It contains sound when the gender is revealed. Do you want to continue with sound?";
-        document.getElementById('surname').innerHTML= surname;
+        document.getElementById('surname').innerHTML = surname;
 
         document.getElementById('id01').style.display = 'block';
         $('.nosoundbtn').on("click", function (e) {
@@ -286,31 +298,25 @@ function shuffleArray(array) {
             document.getElementById('id01').style.display = 'none';
             nosound = false;
             if (soundHandle.currentTime != 0) { return; }
-                soundHandle = document.getElementById('soundHandle');  
-                soundHandle.autoplay = true;
+            soundHandle = document.getElementById('soundHandle');
+            soundHandle.autoplay = true;
             soundHandle.muted = false;
-                soundHandle.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-                soundHandle.src = 'audio/celebrate.mp3';
-                soundHandle.play();
-                soundHandle.pause();
+            soundHandle.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+            soundHandle.src = 'audio/celebrate.mp3';
+            soundHandle.play();
+            soundHandle.pause();
         });
         document.addEventListener(
             "visibilitychange",
             function (evt) {
-              if (document.visibilityState != "visible") {
-                soundHandle.pause();
+                if (document.visibilityState != "visible") {
+                    soundHandle.pause();
                     soundHandle.currentTime = 0;
                 }
             },
             false,
-          );
-        // const mediaQueryList = window.matchMedia("(orientation: portrait)");
-        // mediaQueryList.addEventListener("change", handleOrientationChange);
-        // handleOrientationChange(mediaQueryList);
-        
-           
-       
-   // Add cubic easing if not present
+        );
+        // Add cubic easing if not present
         if (!jQuery.easing.easeOutCubic) {
             jQuery.easing.easeOutCubic = function (x, t, b, c, d) {
                 return c * ((t = t / d - 1) * t * t + 1) + b;
@@ -318,13 +324,12 @@ function shuffleArray(array) {
         }
         if (!jQuery.easing.easeOutBack) {
             jQuery.easing.easeOutBack = function (x, t, b, c, d, s) {
-                if (s === undefined) s =0.5;
+                if (s === undefined) s = 0.5;
                 return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
             };
         }
-     $('#resetbutton').on('click', onSpinButtonClick); 
-    
-};
+        $('#resetbutton').on('click', onSpinButtonClick);
+    }
 function spinBars(allowedStops, uniquePerBar) {
     isSpinning = true;
     spinCancelled = false;
