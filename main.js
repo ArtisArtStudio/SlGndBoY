@@ -17,6 +17,7 @@ var confettiFrameId = null;
 var confettiCancelled = false;
 var confettiTimeoutId = null;
 var spinCount = 0;
+var reelSoundHandle = null;
 // Cached DOM elements
 var $bars, bars, $barElems, numBars;
 
@@ -128,7 +129,8 @@ function shuffleArray(array) {
         positionBars(true); // realign to random positions
         triggered = false;
         soundHandle.pause();
-        soundHandle.currentTime = 0;    
+        soundHandle.currentTime = 0;
+        stopReelSound();  
         return false;
     };
    function forceResetSpin() {
@@ -208,7 +210,7 @@ function shuffleArray(array) {
                 this.style.backgroundSize = '';
             });
             positionBars(false);
-        }, 500);
+        }, 400);
    }
    function positionBars(randomize) {
     if (!randomize) {
@@ -333,7 +335,6 @@ function spinBars(allowedStops, uniquePerBar) {
       spinTimeouts.forEach(function(id) { clearTimeout(id); });
       spinTimeouts = [];
     }
-    var reelSoundHandle = null;
     return new Promise((resolve) => {
         var minCycles = 20;
         var maxCycles = 50;
@@ -360,15 +361,7 @@ function spinBars(allowedStops, uniquePerBar) {
             }
         }
 
-        function stopReelSound() {
-            if (reelSoundHandle) {
-                try {
-                    reelSoundHandle.pause();
-                    reelSoundHandle.currentTime = 0;
-                } catch (e) {}
-                reelSoundHandle = null;
-            }
-        }
+        
 
         function animateBarSequentially(index) {
             if (spinCancelled) {
@@ -409,6 +402,15 @@ function spinBars(allowedStops, uniquePerBar) {
         spinTimeouts.push(resolveTimeoutId);
     });
 }
+function stopReelSound() {
+            if (reelSoundHandle) {
+                try {
+                    reelSoundHandle.pause();
+                    reelSoundHandle.currentTime = 0;
+                } catch (e) {}
+                reelSoundHandle = null;
+            }
+        }
 function flashBars() {
   const bars = document.querySelector('.bars');
   $('.bars').css('background', 'none'); // Remove background image
