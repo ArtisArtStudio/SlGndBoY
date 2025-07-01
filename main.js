@@ -163,7 +163,7 @@ function shuffleArray(array) {
    }
    function calculatesize() {
         // Calculate scaling ratio based on .bars max-width (300px) and image width (80px)
-        if (isSpinning || triggered) {
+        if (isSpinning) {
             forceResetSpin();
             display_dialog("Please wait for the current spin to finish before resizing or changing orientation.");
         }
@@ -202,35 +202,30 @@ function shuffleArray(array) {
 
             // Set iconHeight so that exactly 3 icons fit in .bar
             iconHeight = barHeight / 3;
-
-            // Log all relevant values for debugging
-            let sumBarWidths = 0;
-            let sumBarMargins = 0;
+            // Remove any forced background-size logic; let CSS/JS set it only once at init if needed
             $barElems.each(function() {
-                sumBarWidths += this.getBoundingClientRect().width;
-                sumBarMargins += parseFloat(this.style.marginLeft) + parseFloat(this.style.marginRight);
+                // Only set background-size if not already set, and do not stretch in Y
+                this.style.backgroundSize = '';
             });
-            const totalUsed = sumBarWidths + sumBarMargins + 2 * barsPadding;
-            console.log('barsWidth: ' + barsWidth + ' sumBarWidths: ' + sumBarWidths + ' sumBarMargins: ' + sumBarMargins + ' barsPadding*2: ' + (2 * barsPadding) + ' totalUsed: ' + totalUsed + ' diff: ' + (barsWidth - totalUsed));
-
             positionBars(false);
         }, 500);
    }
    function positionBars(randomize) {
     if (!randomize) {
         $('.bar').each(function(index, el) {
-            var posY = Math.round((barPositions[index] * iconHeight) - iconHeight);
+            // Correct formula: offset so that the selected icon is perfectly centered in the visible window
+            var posY = -((barPositions[index] - 1) * iconHeight);
+            // Only set background-position-y in JS; let CSS handle background-position-x and background-size
             $(el).css('background-position-y', posY + 'px');
         });
     } else {
         // Use the same unique-per-bar logic as in spinBars for initial shuffle
         var allowedStops = Array.from({length: totalIcons}, (_, i) => i).filter(i => !stopPositions.includes(i));
-        var numBars = $('.bar').length;
         var uniqueStops = shuffleArray(allowedStops).slice(0, numBars);
         $('.bar').each(function(index, el) {
             var pos = uniqueStops[index];
             barPositions[index] = pos;
-            var posY = Math.round((pos * iconHeight) - iconHeight);
+            var posY = -((pos - 1) * iconHeight);
             $(el).css('background-position-y', posY + 'px');
         });
     }
