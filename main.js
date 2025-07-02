@@ -113,7 +113,6 @@ function shuffleArray(array) {
     function onResetClicked() {
         var i;
         pct = 0;
-        CrispyToast.toasts=[];  
         $("#resetbutton").val('Play!');
 
         $('#t1').html("<span id='boy' style='color:#7FB1ED ;white-space: normal;'>Boy</span><span id='or' style='font-size: 0.6em; color:#424242;white-space: normal;'> or </span><span id='girl' style='color:#ffc0cb;white-space: normal;'>Girl</span>");
@@ -131,6 +130,9 @@ function shuffleArray(array) {
         soundHandle.pause();
         soundHandle.currentTime = 0;
         stopReelSound();  
+        // Remove pink overlay if present
+        var pinkOverlay = document.getElementById('pink-overlay-reel3');
+        if (pinkOverlay) pinkOverlay.remove();
         return false;
     };
    function forceResetSpin() {
@@ -167,7 +169,7 @@ function shuffleArray(array) {
         // Calculate scaling ratio based on .bars max-width (300px) and image width (80px)
         if (isSpinning) {
             forceResetSpin();
-            display_dialog("Please wait for the current spin to finish before resizing or changing orientation.");
+            display_dialog("Please do not resize the window or change orientation during play. It will reset the game.");
         }
         setTimeout(function() {
             // Use cached DOM elements
@@ -175,8 +177,8 @@ function shuffleArray(array) {
             const barsWidth = bars.getBoundingClientRect().width;
 
             // Set .bars max size and padding
-            bars.style.maxWidth = '300px';
-            bars.style.maxHeight = '270px';
+            //bars.style.maxWidth = '300px';
+            //bars.style.maxHeight = '270px';
             const barsPadding = Math.round(barsWidth / 10);
             bars.style.padding = barsPadding + 'px';
 
@@ -191,6 +193,7 @@ function shuffleArray(array) {
             const totalBarMargins = (numBars * 2 * barMargin);
             const availableWidth = barsWidth - 2 * barsPadding - totalBarMargins;
             const barWidth = availableWidth / numBars;
+
             $barElems.each(function() {
                 this.style.width = barWidth + 'px';
             });
@@ -207,18 +210,24 @@ function shuffleArray(array) {
             // Remove any forced background-size logic; let CSS/JS set it only once at init if needed
             $barElems.each(function() {
                 // Only set background-size if not already set, and do not stretch in Y
-                this.style.backgroundSize = '';
+                //this.style.backgroundSize = '';
+                this.style.backgroundSize = `auto ${iconHeight * totalIcons}px`;
+
             });
             positionBars(false);
+            if (triggered) {
+                updatePinkOverlayReel3Position();
+            }
         }, 400);
    }
    function positionBars(randomize) {
     if (!randomize) {
         $('.bar').each(function(index, el) {
             // Correct formula: offset so that the selected icon is perfectly centered in the visible window
-            var posY = -((barPositions[index] - 1) * iconHeight);
+            var posY = Math.round(-((barPositions[index] - 1) * iconHeight));
             // Only set background-position-y in JS; let CSS handle background-position-x and background-size
-            $(el).css('background-position-y', posY + 'px');
+            //$(el).css('background-position-y', posY + 'px');
+            $(el).css('background-position', 'center ' + posY + 'px');
         });
     } else {
         // Use the same unique-per-bar logic as in spinBars for initial shuffle
@@ -227,8 +236,8 @@ function shuffleArray(array) {
         $('.bar').each(function(index, el) {
             var pos = uniqueStops[index];
             barPositions[index] = pos;
-            var posY = -((pos - 1) * iconHeight);
-            $(el).css('background-position-y', posY + 'px');
+            var posY = Math.round(-((pos - 1) * iconHeight));
+            $(el).css('background-position', 'center ' + posY + 'px');
         });
     }
 }
@@ -307,8 +316,7 @@ function shuffleArray(array) {
             "visibilitychange",
             function (evt) {
                 if (document.visibilityState != "visible") {
-                    soundHandle.pause();
-                    soundHandle.currentTime = 0;
+                    forceResetSpin();
                 }
             },
             false,
@@ -427,6 +435,75 @@ function flashBars() {
   }, 1200); // 0.3s * 4 (duration * iterations)
 }
 
+// Pink overlay flash logic after reveal
+function flashPinkOverlayReel3() {
+  // Remove if already exists
+  var old = document.getElementById('pink-overlay-reel3');
+  if (old) old.remove();
+  // Find the .bars container and its bounding box
+  var bars = document.querySelector('.bars');
+  if (!bars) return;
+  var barsRect = bars.getBoundingClientRect();
+  // Find the third .bar
+  var barElems = bars.querySelectorAll('.bar');
+  if (barElems.length < 3) return;
+  var bar3 = barElems[2];
+  var barRect = bar3.getBoundingClientRect();
+  // Calculate overlay position relative to .bars
+  var overlay = document.createElement('div');
+  overlay.id = 'pink-overlay-reel3';
+  // Middle third of the bar
+  var barHeight = barRect.height;
+  var overlayTop = barRect.top - barsRect.top + barHeight / 3;
+  var overlayHeight = barHeight / 3;
+  overlay.style.position = 'absolute';
+  overlay.style.left = (bar3.offsetLeft) + 'px';
+  overlay.style.top = overlayTop + 'px';
+  overlay.style.width = bar3.offsetWidth + 'px';
+  overlay.style.height = overlayHeight + 'px';
+  overlay.style.background = 'rgba(255, 105, 180, 0.7)';
+  overlay.style.border = '4px solid #ff69b4';
+  overlay.style.borderRadius = '8px';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.boxSizing = 'border-box';
+  overlay.style.transition = 'background 0.3s';
+  bars.appendChild(overlay);
+  // Flash effect
+  overlay.animate([
+    { opacity: 0 },
+    { opacity: 1 },
+    { opacity: 1 },
+    { opacity: 0.7 }
+  ], {
+    duration: 400,
+    iterations: 2
+  });
+  setTimeout(function() {
+    overlay.style.background = 'none';
+    overlay.style.border = '4px solid #ff69b4';
+  }, 1200);
+}
+
+// Helper to update pink overlay position if present
+function updatePinkOverlayReel3Position() {
+  var overlay = document.getElementById('pink-overlay-reel3');
+  if (!overlay) return;
+  var bars = document.querySelector('.bars');
+  if (!bars) return;
+  var barsRect = bars.getBoundingClientRect();
+  var barElems = bars.querySelectorAll('.bar');
+  if (barElems.length < 3) return;
+  var bar3 = barElems[2];
+  var barRect = bar3.getBoundingClientRect();
+  var barHeight = barRect.height;
+  var overlayTop = barRect.top - barsRect.top + barHeight / 3;
+  var overlayHeight = barHeight / 3;
+  overlay.style.left = (bar3.offsetLeft) + 'px';
+  overlay.style.top = overlayTop + 'px';
+  overlay.style.width = bar3.offsetWidth + 'px';
+  overlay.style.height = overlayHeight + 'px';
+}
+
 async function onSpinButtonClick() {
   if (triggered) {
     onResetClicked();
@@ -469,6 +546,7 @@ async function onSpinButtonClick() {
       flashBars();
       confetti_effect();
       $("#gameText").text("");
+      flashPinkOverlayReel3();
     }, 500);
     spinCount = 0; // Reset for next game
   }
