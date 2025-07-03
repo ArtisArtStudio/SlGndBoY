@@ -444,23 +444,23 @@ function flashPinkOverlayReel3() {
   var bars = document.querySelector('.bars');
   if (!bars) return;
   var barsRect = bars.getBoundingClientRect();
-  // Find the third .bar
+  // Find all .bar elements
   var barElems = bars.querySelectorAll('.bar');
   if (barElems.length < 3) return;
-  var bar3 = barElems[2];
-  var barRect = bar3.getBoundingClientRect();
-  // Calculate overlay position relative to .bars
+  // Calculate overlay position and size: 3 .bar wide, height = 1 iconHeight, vertically centered
+  var firstBar = barElems[0];
+  var lastBar = barElems[barElems.length - 1];
   var overlay = document.createElement('div');
   overlay.id = 'pink-overlay-reel3';
-  // Middle third of the bar
-  var barHeight = barRect.height;
-  var overlayTop = barRect.top - barsRect.top + barHeight / 3;
-  var overlayHeight = barHeight / 3;
+  // Position relative to .bars
   overlay.style.position = 'absolute';
-  overlay.style.left = (bar3.offsetLeft) + 'px';
+  overlay.style.left = (firstBar.offsetLeft) + 'px';
+  // Vertically center the overlay in the bars container
+  var barHeight = firstBar.offsetHeight;
+  var overlayTop = (firstBar.offsetTop) + (barHeight / 2) - (iconHeight / 2);
   overlay.style.top = overlayTop + 'px';
-  overlay.style.width = bar3.offsetWidth + 'px';
-  overlay.style.height = overlayHeight + 'px';
+  overlay.style.width = (lastBar.offsetLeft + lastBar.offsetWidth - firstBar.offsetLeft) + 'px';
+  overlay.style.height = iconHeight + 'px';
   overlay.style.background = 'rgba(255, 105, 180, 0.7)';
   overlay.style.border = '4px solid #ff69b4';
   overlay.style.borderRadius = '8px';
@@ -533,7 +533,7 @@ async function onSpinButtonClick() {
   $("#gameText").removeClass('pulsate');
   spinCount++;
   if (isFirstSpin) {
-    $("#gameText").text("👶 The baby is keeping it a secret!");
+    $("#gameText").text("👶 The baby is keeping it a secret! Try again!");
     $("#resetbutton").val('Spin Again');
     $("#resetbutton").css('visibility', 'visible');
   } else if (isSecondSpin) {
