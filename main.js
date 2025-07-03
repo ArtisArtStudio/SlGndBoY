@@ -421,6 +421,10 @@ function stopReelSound() {
         }
 function flashBars() {
   const bars = document.querySelector('.bars');
+  // Set --flash-color CSS variable to colortxt for dynamic flash color
+  if (bars) {
+    bars.style.setProperty('--flash-color', colortxt);
+  }
   $('.bars').css('background', 'none'); // Remove background image
   bars.classList.add('flash-pink');
   // After animation, remove flash-pink and add flash-pink-done
@@ -461,8 +465,14 @@ function flashPinkOverlayReel3() {
   overlay.style.top = overlayTop + 'px';
   overlay.style.width = (lastBar.offsetLeft + lastBar.offsetWidth - firstBar.offsetLeft) + 'px';
   overlay.style.height = iconHeight + 'px';
-  overlay.style.background = 'rgba(255, 105, 180, 0.7)';
-  overlay.style.border = '4px solid #ff69b4';
+  // Use colortxt for overlay color and border, with transparency
+  overlay.style.background = colortxt + 'b3'; // add alpha if hex, fallback to rgba below
+  // If colortxt is not hex, fallback to rgba with alpha
+  if (!/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(colortxt)) {
+    overlay.style.background = colortxt;
+    overlay.style.opacity = 0.7;
+  }
+  overlay.style.border = '4px solid ' + colortxt;
   overlay.style.borderRadius = '8px';
   overlay.style.pointerEvents = 'none';
   overlay.style.boxSizing = 'border-box';
@@ -480,7 +490,7 @@ function flashPinkOverlayReel3() {
   });
   setTimeout(function() {
     overlay.style.background = 'none';
-    overlay.style.border = '4px solid #ff69b4';
+    overlay.style.border = '4px solid ' + colortxt;
   }, 1200);
 }
 
@@ -490,18 +500,16 @@ function updatePinkOverlayReel3Position() {
   if (!overlay) return;
   var bars = document.querySelector('.bars');
   if (!bars) return;
-  var barsRect = bars.getBoundingClientRect();
   var barElems = bars.querySelectorAll('.bar');
   if (barElems.length < 3) return;
-  var bar3 = barElems[2];
-  var barRect = bar3.getBoundingClientRect();
-  var barHeight = barRect.height;
-  var overlayTop = barRect.top - barsRect.top + barHeight / 3;
-  var overlayHeight = barHeight / 3;
-  overlay.style.left = (bar3.offsetLeft) + 'px';
+  var firstBar = barElems[0];
+  var lastBar = barElems[barElems.length - 1];
+  var barHeight = firstBar.offsetHeight;
+  var overlayTop = (firstBar.offsetTop) + (barHeight / 2) - (iconHeight / 2);
+  overlay.style.left = (firstBar.offsetLeft) + 'px';
   overlay.style.top = overlayTop + 'px';
-  overlay.style.width = bar3.offsetWidth + 'px';
-  overlay.style.height = overlayHeight + 'px';
+  overlay.style.width = (lastBar.offsetLeft + lastBar.offsetWidth - firstBar.offsetLeft) + 'px';
+  overlay.style.height = iconHeight + 'px';
 }
 
 async function onSpinButtonClick() {
