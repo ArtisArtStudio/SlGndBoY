@@ -239,8 +239,8 @@ white-space:normal;
     font-size: 2vh;
   }  
   .bars {
-    max-width: 60vw !important;
-    max-height: 54vw !important;
+    max-width: 60vh !important;
+    max-height: 54vh !important;
   }
 }
 
